@@ -25,6 +25,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.17.3",
     "morgan": "^1.10.0",
+    "pdfkit": "^0.16.0",
     "sqlite3": "^5.1.6"
   }
 }

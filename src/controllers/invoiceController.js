@@ -1,5 +1,8 @@
 const Invoice = require('../models/invoice');
 const Client = require('../models/client');
+const User = require('../models/user');
+const { generateInvoicePDF } = require('../utils/pdfGenerator');
+const path = require('path');
 
 // Get all invoices
 exports.getAllInvoices = async (req, res) => {
@@ -357,5 +360,37 @@ exports.updateInvoiceStatus = async (req, res) => {
   } catch (err) {
     console.error('Update invoice status error:', err);
     res.redirect(`/invoices/view/${req.params.id}?error=An error occurred while updating status`);
+  }
+};
+
+// Export invoice as PDF
+exports.exportPDF = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const invoiceId = req.params.id;
+    
+    // Get invoice data
+    const invoice = await Invoice.findById(invoiceId, userId);
+    if (!invoice) {
+      return res.status(404).send('Invoice not found');
+    }
+    
+    // Get user data for company information
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    
+    // Generate PDF directly to response
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoice.invoice_number}.pdf"`);
+    
+    // Generate and stream the PDF directly to the response
+    const doc = await generateInvoicePDF(invoice, user);
+    doc.pipe(res);
+    
+  } catch (err) {
+    console.error('Export PDF error:', err);
+    res.status(500).send('An error occurred while generating the PDF');
   }
 };

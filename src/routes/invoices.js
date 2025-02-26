@@ -23,4 +23,7 @@ router.get('/item/:id/:itemId/delete', invoiceController.deleteInvoiceItem);
 // Invoice status update
 router.post('/status/:id', invoiceController.updateInvoiceStatus);
 
+// Export invoice as PDF
+router.get('/pdf/:id', invoiceController.exportPDF);
+
 module.exports = router;
