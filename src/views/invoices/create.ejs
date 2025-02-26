@@ -1,0 +1,218 @@
+<%- contentFor('body') %>
+
+<div class="row">
+  <div class="col-md-12 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2><i class="fas fa-plus"></i> New Invoice</h2>
+      <a href="/invoices" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Invoices
+      </a>
+    </div>
+    <hr>
+  </div>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-danger">
+    <%= error %>
+  </div>
+<% } %>
+
+<form method="POST" action="/invoices/create" id="invoiceForm">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Invoice Information</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="client_id" class="form-label">Client *</label>
+                <select class="form-select" id="client_id" name="client_id" required>
+                  <option value="">Select Client</option>
+                  <% clients.forEach(client => { %>
+                    <option value="<%= client.id %>" <%= formData.client_id == client.id ? 'selected' : '' %>>
+                      <%= client.name %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="invoice_number" class="form-label">Invoice Number *</label>
+                <input type="text" class="form-control" id="invoice_number" name="invoice_number" value="<%= formData.invoice_number %>" required>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="issue_date" class="form-label">Issue Date *</label>
+                <input type="date" class="form-control" id="issue_date" name="issue_date" value="<%= formData.issue_date %>" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="due_date" class="form-label">Due Date *</label>
+                <input type="date" class="form-control" id="due_date" name="due_date" value="<%= formData.due_date %>" required>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+              <option value="DRAFT" <%= formData.status === 'DRAFT' ? 'selected' : '' %>>Draft</option>
+              <option value="PENDING" <%= formData.status === 'PENDING' ? 'selected' : '' %>>Pending</option>
+              <option value="PAID" <%= formData.status === 'PAID' ? 'selected' : '' %>>Paid</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3"><%= formData.notes || '' %></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Summary</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal:</span>
+            <span id="subtotal">$0.00</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="h5">Total:</span>
+            <span class="h5" id="total">$0.00</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i> Create Invoice
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Invoice Items</h5>
+      <button type="button" class="btn btn-light btn-sm" id="addItemBtn">
+        <i class="fas fa-plus"></i> Add Item
+      </button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0" id="itemsTable">
+          <thead>
+            <tr>
+              <th style="width: 50%">Description</th>
+              <th style="width: 15%">Quantity</th>
+              <th style="width: 15%">Unit Price</th>
+              <th style="width: 15%">Amount</th>
+              <th style="width: 5%"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="item-row">
+              <td>
+                <input type="text" class="form-control item-description" name="item-description[]" placeholder="Item description" required>
+              </td>
+              <td>
+                <input type="number" class="form-control item-quantity" name="item-quantity[]" min="1" value="1" required>
+              </td>
+              <td>
+                <input type="number" class="form-control item-unit-price" name="item-unit-price[]" min="0" step="0.01" value="0.00" required>
+              </td>
+              <td>
+                <span class="item-amount">$0.00</span>
+              </td>
+              <td>
+                <button type="button" class="btn btn-danger btn-sm remove-item">
+                  <i class="fas fa-times"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Function to calculate item amount
+    function calculateItemAmount(row) {
+      const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+      const unitPrice = parseFloat(row.querySelector('.item-unit-price').value) || 0;
+      const amount = quantity * unitPrice;
+      row.querySelector('.item-amount').textContent = '$' + amount.toFixed(2);
+      return amount;
+    }
+    
+    // Function to calculate totals
+    function calculateTotals() {
+      let subtotal = 0;
+      document.querySelectorAll('.item-row').forEach(row => {
+        subtotal += calculateItemAmount(row);
+      });
+      
+      document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('total').textContent = '$' + subtotal.toFixed(2);
+    }
+    
+    // Add item button
+    document.getElementById('addItemBtn').addEventListener('click', function() {
+      const itemsTable = document.getElementById('itemsTable');
+      const lastRow = itemsTable.querySelector('tbody tr:last-child');
+      const newRow = lastRow.cloneNode(true);
+      
+      // Clear input values
+      newRow.querySelector('.item-description').value = '';
+      newRow.querySelector('.item-quantity').value = '1';
+      newRow.querySelector('.item-unit-price').value = '0.00';
+      newRow.querySelector('.item-amount').textContent = '$0.00';
+      
+      // Add event listeners to new row
+      addRowEventListeners(newRow);
+      
+      // Add new row to table
+      itemsTable.querySelector('tbody').appendChild(newRow);
+    });
+    
+    // Remove item button
+    function addRowEventListeners(row) {
+      row.querySelector('.remove-item').addEventListener('click', function() {
+        const itemRows = document.querySelectorAll('.item-row');
+        if (itemRows.length > 1) {
+          row.remove();
+          calculateTotals();
+        }
+      });
+      
+      row.querySelector('.item-quantity').addEventListener('input', calculateTotals);
+      row.querySelector('.item-unit-price').addEventListener('input', calculateTotals);
+    }
+    
+    // Add event listeners to initial row
+    document.querySelectorAll('.item-row').forEach(row => {
+      addRowEventListeners(row);
+    });
+    
+    // Calculate initial totals
+    calculateTotals();
+  });
+</script>

@@ -1,0 +1,89 @@
+/* Custom Styles */
+
+/* Body and general styles */
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card shadow */
+.card.shadow {
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+}
+
+/* Table styles */
+.table th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Invoice status badges */
+.badge {
+  padding: 0.4em 0.6em;
+  font-weight: 500;
+}
+
+/* Buttons */
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.765rem;
+}
+
+/* Navbar customization */
+.navbar-dark.bg-primary {
+  background-color: #2c3e50 !important;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Dashboard cards */
+.card .card-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Form controls */
+.form-control:focus, .form-select:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+}
+
+/* Login/Register forms */
+.col-md-6 .card, .col-md-8 .card {
+  border-radius: 0.5rem;
+}
+
+/* Invoice view page */
+.invoice-header {
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+/* Footer */
+.footer {
+  margin-top: 2rem;
+  padding: 1rem 0;
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .btn-group .btn {
+    margin-bottom: 0.25rem;
+    border-radius: 0.25rem !important;
+  }
+}
